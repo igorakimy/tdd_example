@@ -3,13 +3,17 @@ package main
 import (
 	"fmt"
 	"io"
-	"os"
+	"net/http"
 )
 
 func Greet(writer io.Writer, name string) {
 	fmt.Fprintf(writer, "Hello, %s", name)
 }
 
+func MyGreetFunction(w http.ResponseWriter, r *http.Request) {
+	Greet(w, "world")
+}
+
 func main() {
-	Greet(os.Stdout, "Eloide")
+	http.ListenAndServe(":5000", http.HandlerFunc(MyGreetFunction))
 }
