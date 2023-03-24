@@ -13,7 +13,7 @@ func mockWebsiteChecker(url string) bool {
 	return true
 }
 
-func TestCheckWebsite(t *testing.T) {
+func TestCheckWebsites(t *testing.T) {
 	websites := []string{
 		"http://google.com",
 		"http://blog.gypsydave5.com",
