@@ -26,7 +26,7 @@ func TestCheckWebsite(t *testing.T) {
 		"waat://furhurterwe.geds":    false,
 	}
 
-	got := CheckWebsite(mockWebsiteChecker, websites)
+	got := CheckWebsites(mockWebsiteChecker, websites)
 
 	if !reflect.DeepEqual(want, got) {
 		t.Fatalf("Wanted %v, got %v", want, got)
@@ -45,6 +45,6 @@ func BenchmarkCheckWebsite(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		CheckWebsite(slowStubWebsiteChecker, urls)
+		CheckWebsites(slowStubWebsiteChecker, urls)
 	}
 }
