@@ -14,15 +14,15 @@ func (s *SpySleeper) Sleep() {
 	s.Calls++
 }
 
-type CountdownOperationSpy struct {
+type CountdownOperationsSpy struct {
 	Calls []string
 }
 
-func (s *CountdownOperationSpy) Sleep() {
+func (s *CountdownOperationsSpy) Sleep() {
 	s.Calls = append(s.Calls, sleep)
 }
 
-func (s *CountdownOperationSpy) Write(p []byte) (n int, err error) {
+func (s *CountdownOperationsSpy) Write(p []byte) (n int, err error) {
 	s.Calls = append(s.Calls, write)
 	return
 }
@@ -50,7 +50,7 @@ Go!`
 	})
 
 	t.Run("sleep before every print", func(t *testing.T) {
-		spySleepPrinter := &CountdownOperationSpy{}
+		spySleepPrinter := &CountdownOperationsSpy{}
 		Countdown(spySleepPrinter, spySleepPrinter)
 
 		want := []string{
