@@ -275,7 +275,7 @@ func getLeagueFromRequest(t *testing.T, body io.Reader) (league []Player) {
 	return
 }
 
-func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func()) {
+func createTempFile(t *testing.T, initialData string) (*os.File, func()) {
 	t.Helper()
 
 	tmpFile, err := os.CreateTemp("", "db")
