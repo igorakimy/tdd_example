@@ -1,3 +1,3 @@
-module github.com/igorakimy/pocker
+module github.com/igorakimy/poker
 
 go 1.19

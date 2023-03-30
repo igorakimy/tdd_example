@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/igorakimy/pocker"
+	"github.com/igorakimy/poker"
 )
 
 const dbFileName = "game.db.json"
@@ -17,12 +17,12 @@ func main() {
 		log.Fatalf("proplem opening %s, %v", dbFileName, err)
 	}
 
-	store, err := pocker.NewFileSystemPlayerStore(db)
+	store, err := poker.NewFileSystemPlayerStore(db)
 	if err != nil {
 		log.Fatalf("problem creating file system player store, %v", err)
 	}
 
-	server := pocker.NewPlayerServer(store)
+	server := poker.NewPlayerServer(store)
 
 	if err := http.ListenAndServe(":5000", server); err != nil {
 		log.Fatalf("could not listen on port 5000: %v", err)
