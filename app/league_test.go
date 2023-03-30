@@ -1,4 +1,4 @@
-package poker
+package poker_test
 
 import (
 	"encoding/json"
@@ -7,19 +7,21 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	"github.com/igorakimy/poker"
 )
 
 func TestLeague(t *testing.T) {
 
 	t.Run("it returns the league table as JSON", func(t *testing.T) {
-		wantedLeague := []Player{
+		wantedLeague := []poker.Player{
 			{"Cleo", 32},
 			{"Chris", 20},
 			{"Tiest", 14},
 		}
 
-		store := StubPlayerStore{league: wantedLeague}
-		server := NewPlayerServer(&store)
+		store := poker.NewStubPlayerStore(nil, nil, wantedLeague)
+		server := poker.NewPlayerServer(store)
 
 		request := newLeagueRequest()
 		response := httptest.NewRecorder()
@@ -27,13 +29,13 @@ func TestLeague(t *testing.T) {
 		server.ServeHTTP(response, request)
 
 		got := getLeagueFromRequest(t, response.Body)
-		assertStatus(t, response.Code, http.StatusOK)
+		poker.AssertStatus(t, response.Code, http.StatusOK)
 		assertLeague(t, got, wantedLeague)
-		assertContentType(t, response, "application/json")
+		poker.AssertContentType(t, response, "application/json")
 	})
 }
 
-func getLeagueFromRequest(t *testing.T, body io.Reader) (league []Player) {
+func getLeagueFromRequest(t *testing.T, body io.Reader) (league []poker.Player) {
 	t.Helper()
 	if err := json.NewDecoder(body).Decode(&league); err != nil {
 		t.Fatalf(
@@ -50,7 +52,7 @@ func newLeagueRequest() *http.Request {
 	return req
 }
 
-func assertLeague(t *testing.T, got, want []Player) {
+func assertLeague(t *testing.T, got, want []poker.Player) {
 	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v, want %v", got, want)
