@@ -1,3 +1,3 @@
-module github.com/igorakimy/app
+module github.com/igorakimy/pocker
 
 go 1.19
