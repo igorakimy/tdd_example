@@ -1,7 +1,9 @@
 package poker_test
 
 import (
+	"bytes"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -11,10 +13,12 @@ import (
 type GameSpy struct {
 	StartedWith  int
 	FinishedWith string
+	StartCalled  bool
 }
 
 func (g *GameSpy) Start(numberOfPlayers int) {
 	g.StartedWith = numberOfPlayers
+	g.StartCalled = true
 }
 
 func (g *GameSpy) Finish(winner string) {
@@ -60,6 +64,39 @@ func TestGame_Start(t *testing.T) {
 		}
 
 		checkSchedulingCases(cases, t, blindAlerter)
+	})
+
+	t.Run("it prompts the user to enter the number of players and starts the game", func(t *testing.T) {
+		stdout := &bytes.Buffer{}
+		in := strings.NewReader("7\n")
+		game := &GameSpy{}
+
+		cli := poker.NewCLI(in, stdout, game)
+		cli.PlayPoker()
+
+		gotPrompt := stdout.String()
+		wantPrompt := poker.PlayerPrompt
+
+		if gotPrompt != wantPrompt {
+			t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
+		}
+
+		if game.StartedWith != 7 {
+			t.Errorf("wanted Start called with 7, but got %d", game.StartedWith)
+		}
+	})
+
+	t.Run("it prints an error when a non numeric value is entered and doesn't start the game", func(t *testing.T) {
+		stdout := &bytes.Buffer{}
+		in := strings.NewReader("Pies\n")
+		game := &GameSpy{}
+
+		cli := poker.NewCLI(in, stdout, game)
+		cli.PlayPoker()
+
+		if game.StartCalled {
+			t.Errorf("game should not have started")
+		}
 	})
 }
 
