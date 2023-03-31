@@ -16,14 +16,11 @@ type CLI struct {
 	game *Game
 }
 
-func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI {
+func NewCLI(in io.Reader, out io.Writer, game *Game) *CLI {
 	return &CLI{
-		in:  bufio.NewScanner(in),
-		out: out,
-		game: &Game{
-			alerter: alerter,
-			store:   store,
-		},
+		in:   bufio.NewScanner(in),
+		out:  out,
+		game: game,
 	}
 }
 
@@ -47,5 +44,5 @@ func (cli *CLI) readLine() string {
 }
 
 func extractWinner(userInput string) string {
-	return strings.Replace(userInput, " wins\n", "", 1)
+	return strings.Replace(userInput, " wins", "", 1)
 }

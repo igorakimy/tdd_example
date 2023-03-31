@@ -10,24 +10,8 @@ import (
 	"github.com/igorakimy/poker"
 )
 
-type scheduledAlert struct {
-	at     time.Duration
-	amount int
-}
-
-func (s scheduledAlert) String() string {
-	return fmt.Sprintf("%d chips at %v", s.amount, s.at)
-}
-
-type SpyBlindAlerter struct {
-	alerts []scheduledAlert
-}
-
-func (s *SpyBlindAlerter) ScheduleAlertAt(at time.Duration, amount int) {
-	s.alerts = append(s.alerts, scheduledAlert{at, amount})
-}
-
-var dummySpyAlerter = &SpyBlindAlerter{}
+var dummyBlindAlerter = &poker.SpyBlindAlerter{}
+var dummySpyAlerter = &poker.SpyBlindAlerter{}
 var dummyPlayerStore = &poker.StubPlayerStore{}
 var dummyStdOut = &bytes.Buffer{}
 
@@ -36,8 +20,9 @@ func TestCLI(t *testing.T) {
 	t.Run("record chris win from user input", func(t *testing.T) {
 		in := strings.NewReader("1\nChris wins\n")
 		playerStore := &poker.StubPlayerStore{}
+		game := poker.NewGame(dummySpyAlerter, playerStore)
 
-		cli := poker.NewCLI(playerStore, in, dummyStdOut, dummySpyAlerter)
+		cli := poker.NewCLI(in, dummyStdOut, game)
 		cli.PlayPoker()
 
 		poker.AssertPlayerWin(t, playerStore, "Chris")
@@ -46,8 +31,9 @@ func TestCLI(t *testing.T) {
 	t.Run("record cleo win from user input", func(t *testing.T) {
 		in := strings.NewReader("1\nCleo wins\n")
 		playerStore := &poker.StubPlayerStore{}
+		game := poker.NewGame(dummySpyAlerter, playerStore)
 
-		cli := poker.NewCLI(playerStore, in, dummyStdOut, dummySpyAlerter)
+		cli := poker.NewCLI(in, dummyStdOut, game)
 		cli.PlayPoker()
 
 		poker.AssertPlayerWin(t, playerStore, "Cleo")
@@ -56,12 +42,13 @@ func TestCLI(t *testing.T) {
 	t.Run("it schedules printing of blind values", func(t *testing.T) {
 		in := strings.NewReader("Chris wins\n")
 		playerStore := &poker.StubPlayerStore{}
-		blindAlerter := &SpyBlindAlerter{}
+		blindAlerter := &poker.SpyBlindAlerter{}
+		game := poker.NewGame(blindAlerter, playerStore)
 
-		cli := poker.NewCLI(playerStore, in, dummyStdOut, blindAlerter)
+		cli := poker.NewCLI(in, dummyStdOut, game)
 		cli.PlayPoker()
 
-		cases := []scheduledAlert{
+		cases := []poker.ScheduledAlert{
 			{0 * time.Second, 100},
 			{10 * time.Minute, 200},
 			{20 * time.Minute, 300},
@@ -77,12 +64,12 @@ func TestCLI(t *testing.T) {
 
 		for i, want := range cases {
 			t.Run(fmt.Sprint(want), func(t *testing.T) {
-				if len(blindAlerter.alerts) <= i {
-					t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.alerts)
+				if len(blindAlerter.Alerts) <= i {
+					t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.Alerts)
 				}
 
-				got := blindAlerter.alerts[i]
-				assertScheduledAlert(t, got, want)
+				got := blindAlerter.Alerts[i]
+				poker.AssertScheduledAlert(t, got, want)
 			})
 		}
 	})
@@ -90,9 +77,10 @@ func TestCLI(t *testing.T) {
 	t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
 		stdout := &bytes.Buffer{}
 		in := strings.NewReader("7\n")
-		blindAlerter := &SpyBlindAlerter{}
+		blindAlerter := &poker.SpyBlindAlerter{}
+		game := poker.NewGame(blindAlerter, dummyPlayerStore)
 
-		cli := poker.NewCLI(dummyPlayerStore, in, stdout, blindAlerter)
+		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
 
 		got := stdout.String()
@@ -102,7 +90,7 @@ func TestCLI(t *testing.T) {
 			t.Errorf("got %q, want %q", got, want)
 		}
 
-		cases := []scheduledAlert{
+		cases := []poker.ScheduledAlert{
 			{0 * time.Second, 100},
 			{12 * time.Minute, 200},
 			{24 * time.Minute, 300},
@@ -112,24 +100,13 @@ func TestCLI(t *testing.T) {
 		for i, want := range cases {
 			t.Run(fmt.Sprint(want), func(t *testing.T) {
 
-				if len(blindAlerter.alerts) <= i {
-					t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.alerts)
+				if len(blindAlerter.Alerts) <= i {
+					t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.Alerts)
 				}
 
-				got := blindAlerter.alerts[i]
-				assertScheduledAlert(t, got, want)
+				got := blindAlerter.Alerts[i]
+				poker.AssertScheduledAlert(t, got, want)
 			})
 		}
 	})
-}
-
-func assertScheduledAlert(t *testing.T, got, want scheduledAlert) {
-	t.Helper()
-	if got.amount != want.amount {
-		t.Errorf("got amount %d, want %d", got.amount, want.amount)
-	}
-
-	if got.amount != want.amount {
-		t.Errorf("got scheduled time of %v, want %v", got.at, want.at)
-	}
 }
