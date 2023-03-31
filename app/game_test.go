@@ -94,6 +94,13 @@ func TestGame_Start(t *testing.T) {
 		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
 
+		gotPrompt := stdout.String()
+		wantPrompt := poker.PlayerPrompt + "you're so silly"
+
+		if gotPrompt != wantPrompt {
+			t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
+		}
+
 		if game.StartCalled {
 			t.Errorf("game should not have started")
 		}
