@@ -26,7 +26,7 @@ type PlayerServer struct {
 	template *template.Template
 }
 
-const htmlTemplatePath = "cmd/webserver/game.html"
+const htmlTemplatePath = "game.html"
 
 var wsUpgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
