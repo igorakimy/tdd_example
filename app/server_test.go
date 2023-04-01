@@ -96,6 +96,19 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	})
 }
 
+func TestGame(t *testing.T) {
+	t.Run("GET /game returns 200", func(t *testing.T) {
+		server := poker.NewPlayerServer(&poker.StubPlayerStore{})
+
+		request, _ := http.NewRequest(http.MethodGet, "/game", nil)
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, request)
+
+		poker.AssertStatus(t, response.Code, http.StatusOK)
+	})
+}
+
 func newGetScoreRequest(name string) *http.Request {
 	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
 	return req
