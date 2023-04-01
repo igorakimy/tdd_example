@@ -100,7 +100,7 @@ func TestGame(t *testing.T) {
 	t.Run("GET /game returns 200", func(t *testing.T) {
 		server := poker.NewPlayerServer(&poker.StubPlayerStore{})
 
-		request, _ := http.NewRequest(http.MethodGet, "/game", nil)
+		request := newGameRequest()
 		response := httptest.NewRecorder()
 
 		server.ServeHTTP(response, request)
@@ -116,5 +116,10 @@ func newGetScoreRequest(name string) *http.Request {
 
 func newPostScoreRequest(name string) *http.Request {
 	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", name), nil)
+	return req
+}
+
+func newGameRequest() *http.Request {
+	req, _ := http.NewRequest(http.MethodGet, "/game", nil)
 	return req
 }
