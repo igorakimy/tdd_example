@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/igorakimy/poker"
 )
@@ -10,17 +11,23 @@ import (
 const dbFileName = "game.db.json"
 
 func main() {
-	store, closeFile, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
+	db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("problem opening %s, %v", dbFileName, err)
 	}
-	defer closeFile()
-
-	server, err := poker.NewPlayerServer(store)
+	store, err := poker.NewFileSystemPlayerStore(db)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("problem creating file system player store, %v", err)
+	}
+
+	game := poker.NewTexasHoldem(poker.BlindAlerterFunc(poker.Alerter), store)
+
+	server, err := poker.NewPlayerServer(store, game)
+
+	if err != nil {
+		log.Fatalf("problem creating player server %v", err)
 	}
 
 	if err := http.ListenAndServe(":5000", server); err != nil {

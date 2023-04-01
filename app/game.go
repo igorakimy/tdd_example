@@ -10,16 +10,16 @@ type Game interface {
 	Finish(winner string)
 }
 
-type TexasHoldem struct {
-	alerter BlindAlerter
-	store   PlayerStore
-}
-
-func NewGame(alerter BlindAlerter, store PlayerStore) *TexasHoldem {
+func NewTexasHoldem(alerter BlindAlerter, store PlayerStore) *TexasHoldem {
 	return &TexasHoldem{
 		alerter: alerter,
 		store:   store,
 	}
+}
+
+type TexasHoldem struct {
+	alerter BlindAlerter
+	store   PlayerStore
 }
 
 func (g *TexasHoldem) Start(numberOfPlayers int, alertsDestination io.Writer) {
