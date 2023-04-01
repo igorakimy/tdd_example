@@ -39,9 +39,7 @@ func TestCLI(t *testing.T) {
 		stdout := &bytes.Buffer{}
 
 		in := userSends("3", "Chris wins")
-		cli := poker.NewCLI(in, stdout, game)
-
-		cli.PlayPoker()
+		poker.NewCLI(in, stdout, game).PlayPoker()
 
 		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt)
 		assertGameStartedWith(t, game, 3)
