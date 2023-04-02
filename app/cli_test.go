@@ -5,6 +5,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/igorakimy/poker"
 )
@@ -107,14 +108,24 @@ func assertGameNotFinished(t *testing.T, game *GameSpy) {
 
 func assertGameStartedWith(t *testing.T, game *GameSpy, numberOfPlayersWanted int) {
 	t.Helper()
-	if game.StartedWith != numberOfPlayersWanted {
+
+	passed := retryUntil(500*time.Millisecond, func() bool {
+		return game.StartedWith == numberOfPlayersWanted
+	})
+
+	if !passed {
 		t.Errorf("wnated Start called with %d but got %d", numberOfPlayersWanted, game.StartedWith)
 	}
 }
 
 func assertFinishCalledWith(t *testing.T, game *GameSpy, winner string) {
 	t.Helper()
-	if game.FinishedWith != winner {
+
+	passed := retryUntil(500*time.Millisecond, func() bool {
+		return game.FinishedWith == winner
+	})
+
+	if !passed {
 		t.Errorf("expected finish called with %q but got %q", winner, game.FinishedWith)
 	}
 }
@@ -126,4 +137,14 @@ func assertMessagesSentToUser(t *testing.T, stdout *bytes.Buffer, messages ...st
 	if got != want {
 		t.Errorf("got %q sent to stdout but expected %+v", got, messages)
 	}
+}
+
+func retryUntil(d time.Duration, f func() bool) bool {
+	deadline := time.Now().Add(d)
+	for time.Now().Before(deadline) {
+		if f() {
+			return true
+		}
+	}
+	return false
 }
